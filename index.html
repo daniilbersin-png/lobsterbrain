@@ -1,0 +1,1260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LOBSTERBRAIN</title>
+<meta name="description" content="The 30-cell stomach ganglion of a real lobster, the best-known circuit in neuroscience, running as a published model in your browser with no controller written by anyone. The rhythm holds; the numbers are on the page.">
+<meta property="og:title" content="LOBSTERBRAIN">
+<meta property="og:description" content="The 30-cell stomach ganglion of a real lobster, the best-known circuit in neuroscience, running as a published model in your browser with no controller written by anyone. The rhythm holds; the numbers are on the page.">
+<meta property="og:image" content="/lobster.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#06070a;
+  --plate:#0b0d12;
+  --line:#1a1f28;
+  --dot-hi:#dceef8;
+  --dot-mid:#7db8d4;
+  /* contrast against --ground, measured: ink 14.6:1, ink-dim 7.4:1,
+     ink-faint 4.8:1, cyan 9.6:1, amber 8.9:1 */
+  --ink:#e2eaf1;
+  --ink-dim:#9dabb7;
+  --ink-faint:#75828d;
+  --cyan:#7deaff;
+  --amber:#f0bc5f;
+  --live:#6fdca6;
+  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --sans:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--sans);font-weight:400;font-size:17px;line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+/* mono is for data and labels only - it is a poor face for paragraphs */
+.mono,code,.addr,.eyebrow,.corner,.step .no,.step .tag,th{font-family:var(--mono)}
+a{color:var(--cyan);text-decoration:none;border-bottom:1px solid #1d4653}
+a:hover{border-bottom-color:var(--cyan)}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.wrap{max-width:980px;margin:0 auto;padding:0 24px}
+/* the boards are instrument panels, not prose - they get the width they need */
+.wrap.wide{max-width:1500px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- specimen plate ---------- */
+.plate{position:relative;min-height:420px;border-bottom:1px solid var(--line)}
+#lobster{display:block;width:100%;height:min(62vh,560px)}
+.corner{
+  position:absolute;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-faint);pointer-events:none;line-height:1.7;
+}
+.tl{top:22px;left:24px}
+.tr{top:22px;right:24px;text-align:right}
+.bl{bottom:22px;left:24px}
+.br{bottom:22px;right:24px;text-align:right}
+.tick{color:var(--live)}
+.tick.stale{color:var(--ink-faint)}
+
+.title{
+  position:absolute;left:0;right:0;bottom:64px;text-align:center;pointer-events:none;
+}
+.title h1{
+  font-family:var(--serif);font-weight:400;font-style:normal;
+  font-size:clamp(46px,9.2vw,116px);line-height:.92;margin:0;
+  letter-spacing:.005em;color:#eaf4fa;text-wrap:balance;
+}
+.title .latin{
+  font-family:var(--serif);font-style:italic;font-size:clamp(14px,2.4vw,19px);
+  color:var(--ink-dim);margin-top:10px;
+}
+.title .state{
+  margin-top:18px;font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--amber);font-family:var(--mono);font-weight:500;
+}
+
+/* ---------- sections ---------- */
+section{padding:64px 0;border-bottom:1px solid var(--line)}
+h2{
+  font-family:var(--serif);font-weight:400;font-size:clamp(30px,4vw,40px);line-height:1.15;
+  margin:0 0 6px;color:#eaf4fa;text-wrap:balance;
+}
+.lede{color:var(--ink-dim);max-width:62ch;margin:0 0 30px;font-size:18px;line-height:1.65}
+p{max-width:66ch;color:var(--ink);margin:0 0 18px}
+.eyebrow{
+  font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--ink-faint);margin-bottom:14px;font-weight:500;
+}
+
+.path{display:grid;gap:1px;background:var(--line);border:1px solid var(--line)}
+.step{
+  background:var(--plate);padding:18px 20px;display:grid;
+  grid-template-columns:34px 1fr auto;gap:16px;align-items:baseline;
+}
+.step .no{font-size:12px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.step .what{color:var(--ink);font-weight:500;font-size:16.5px}
+.step .what em{font-style:normal;color:var(--ink-dim);display:block;font-size:15px;margin-top:5px;line-height:1.55}
+.step .tag{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;white-space:nowrap}
+.done .tag{color:var(--live)}
+.fail .tag{color:#ff8b7a}
+.now{background:#0e1219;box-shadow:inset 2px 0 0 var(--amber)}
+.now .tag{color:var(--amber)}
+.todo .tag{color:var(--ink-faint)}
+.todo .what{color:var(--ink-dim)}
+.sub{margin-top:52px}
+
+.wires{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line)}
+.wire{background:var(--plate);padding:18px}
+.wire .cell{font-family:var(--mono);font-size:16px;font-weight:500;color:var(--cyan);letter-spacing:.04em}
+.wire .role{font-size:15px;color:var(--ink-dim);margin-top:6px;line-height:1.55}
+
+table{width:100%;border-collapse:collapse;font-size:15px}
+.scroll{overflow-x:auto}
+td,th{text-align:left;padding:10px 14px 10px 0;border-bottom:1px solid var(--line);
+  vertical-align:top}
+th{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);
+  font-weight:500;white-space:nowrap;padding-right:28px}
+td.num{font-variant-numeric:tabular-nums;color:#eaf4fa}
+.addr{font-size:14px;word-break:break-all;color:var(--ink)}
+
+ul.plain{list-style:none;padding:0;margin:0;display:grid;gap:14px}
+ul.plain li{padding-left:22px;position:relative;color:var(--ink-dim);max-width:68ch;font-size:16.5px}
+ul.plain li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;
+  border-radius:50%;background:var(--ink-faint)}
+ul.plain li b{color:var(--ink);font-weight:600}
+
+footer{padding:44px 0 70px;color:var(--ink-dim);font-size:14.5px}
+footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
+.pill{
+  display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-family:var(--mono);
+  border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--ink-dim);
+}
+.pip{width:6px;height:6px;border-radius:50%;background:var(--live)}
+.pip.stale{background:var(--ink-faint)}
+
+/* ---------- the terminal ----------
+   A phosphor instrument panel inset into the page. It commits to one look and
+   paints every colour explicitly, so it reads the same wherever it lands. */
+.term{
+  --g:#3dff88; --g-dim:#1f8f4d; --g-faint:#155c33; --g-bg:#020704;
+  background:var(--g-bg);border:1px solid #123a24;font-family:var(--mono);
+  color:var(--g);font-size:12px;line-height:1.5;
+}
+.tbar{display:flex;align-items:center;gap:14px;padding:8px 12px;flex-wrap:wrap;
+  border-bottom:1px solid #123a24;background:#04100a}
+.tname{font-weight:500;letter-spacing:.14em}
+.tdim{color:var(--g-faint);letter-spacing:.1em;font-size:10.5px}
+.tspacer{flex:1}
+.tpills{display:flex;gap:6px;flex-wrap:wrap}
+.pip2{border:1px solid var(--g-faint);color:var(--g-dim);padding:2px 7px;
+  font-size:9.5px;letter-spacing:.12em;border-radius:2px;background:transparent;
+  font-family:var(--mono);text-transform:uppercase}
+.pip2.on{color:var(--g);border-color:var(--g-dim);background:#07200f}
+.pip2.off{color:#5a2b2b;border-color:#4a2020}
+button.pip2{cursor:pointer}
+button.pip2:hover{border-color:var(--g)}
+.tlive{color:#ff5f56;font-size:10px;letter-spacing:.14em}
+.tlive.on{color:var(--g)}
+
+.tgrid{display:grid;grid-template-columns:1fr 320px;gap:1px;background:#123a24}
+@media (max-width:880px){.tgrid{grid-template-columns:1fr}}
+.tscreen{position:relative;background:#000;min-height:320px;display:flex;
+  align-items:center;justify-content:center;overflow:hidden}
+.tscreen canvas{display:block;width:100%;height:100%}
+.tscreen.col{flex-direction:column;justify-content:center;min-height:0}
+.tscreen.col canvas{height:auto;aspect-ratio:16/9}
+.turl{position:absolute;left:0;right:0;bottom:0;display:flex;gap:12px;
+  padding:5px 10px;background:rgba(2,7,4,.92);border-top:1px solid #123a24;
+  font-size:11px;color:var(--g-dim)}
+.turl span:first-child{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tcap{width:100%;padding:6px 12px;border-top:1px solid #123a24;background:#04100a;
+  font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#e8c15f;
+  text-align:center}
+
+.tside{background:var(--g-bg);display:grid;align-content:start}
+.tblk{padding:10px 12px;border-bottom:1px solid #0d2c1b}
+.tk{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--g-faint)}
+.tbig{font-size:30px;line-height:1.1;margin-top:5px;letter-spacing:.01em;
+  font-variant-numeric:tabular-nums}
+.tsub{font-size:9.5px;letter-spacing:.13em;color:var(--g-dim);margin-top:1px}
+.tsub.prose{text-transform:none;letter-spacing:0;margin-top:8px}
+.tquad{display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;margin-top:9px}
+.tql{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--g-faint)}
+.tqv{font-size:12.5px;color:var(--g);margin-top:1px;font-variant-numeric:tabular-nums}
+.tqv .bad{color:#ff8b7a}
+.tqv .warn{color:#e8c15f}
+
+.tfoot{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:#123a24;
+  border-top:1px solid #123a24}
+.tfoot>div{background:#04100a;padding:8px 12px;display:flex;
+  justify-content:space-between;align-items:baseline;gap:8px}
+.tfv{font-size:16px;color:var(--g);font-variant-numeric:tabular-nums}
+@media (max-width:640px){.tfoot{grid-template-columns:repeat(2,1fr)}}
+.tnote{padding:10px 12px;border-top:1px solid #123a24;font-size:11px;
+  color:var(--g-dim);line-height:1.65;max-width:none}
+.tnote b{color:var(--g);font-weight:400}
+.tstills{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#123a24;
+  border-top:1px solid #123a24}
+.tstills>div{background:var(--g-bg);padding:10px 12px}
+.tstills canvas{width:100%;display:block;margin-top:8px;border:1px solid #0d2c1b;background:#000;
+  aspect-ratio:4/3}
+@media (max-width:640px){.tstills{grid-template-columns:1fr}}
+
+/* ---------- contract address ----------
+   The one thing most visitors came for, so it gets isolation: its own band,
+   a cyan rule, and the only filled button on the page. */
+.cabar{background:#0a1116;border-bottom:1px solid var(--line);
+  box-shadow:inset 3px 0 0 var(--cyan)}
+.cain{display:flex;align-items:center;justify-content:space-between;
+  gap:22px;padding:20px 24px}
+.calabel{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-faint);font-weight:500}
+.caval{font-family:var(--mono);font-size:15.5px;color:#f0f7fc;margin-top:7px;
+  word-break:break-all;line-height:1.5}
+.caval.soon{color:var(--ink-dim)}
+.copy{
+  display:inline-flex;align-items:center;gap:9px;flex:0 0 auto;
+  min-height:46px;padding:0 20px;border-radius:8px;cursor:pointer;
+  background:#12222a;color:var(--cyan);border:1px solid #24505e;
+  font-family:var(--mono);font-size:14px;font-weight:500;letter-spacing:.02em;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.copy:hover{background:#173139;border-color:var(--cyan)}
+.copy:active{transform:translateY(1px)}
+.copy.done{color:var(--live);border-color:#2f6650;background:#102019}
+.copy[disabled]{opacity:.5;cursor:default}
+.copy svg{width:15px;height:15px;flex:0 0 auto}
+@media (max-width:640px){
+  .cain{flex-direction:column;align-items:stretch;gap:16px;padding:20px}
+  .copy{justify-content:center}
+}
+
+@media (max-width:640px){
+  .step{grid-template-columns:26px 1fr;}
+  .step .tag{grid-column:2;margin-top:4px}
+  /* the absolutely-placed corner labels land on top of the wordmark at this
+     width, so the plate becomes a column and they take their turn in it */
+  .plate{display:flex;flex-direction:column;min-height:0}
+  #lobster{height:38vh;order:1}
+  .title{position:static;order:2;padding:4px 20px 0}
+  .title h1{font-size:clamp(40px,12.5vw,72px)}
+  .tl,.tr{max-width:46%;letter-spacing:.08em}
+  .bl,.br{position:static;order:3;padding:0 20px;text-align:left;line-height:1.5}
+  .bl{padding-top:26px}
+  .br{padding-top:10px;padding-bottom:26px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="plate">
+  <canvas id="lobster" aria-label="An American lobster drawn as a cloud of points"></canvas>
+  <div class="corner tl">specimen<br><span style="color:var(--ink-dim)">Homarus americanus &middot; STG</span></div>
+  <div class="corner tr"><span id="chain-name">chain</span><br><span id="blk" style="color:var(--ink-dim)">block &mdash;</span></div>
+  <div class="corner bl">&asymp;30 neurons &middot; stomatogastric ganglion<br><span style="color:var(--ink-dim)">14 in the pyloric circuit, every synapse known</span></div>
+  <div class="corner br"><span class="tick" id="livedot">&#9679;</span> <span id="livelabel">chain read</span><br><span id="upd" style="color:var(--ink-dim)">&mdash;</span></div>
+  <div class="title">
+    <h1>LOBSTERBRAIN</h1>
+    <div class="latin">Homarus americanus</div>
+    <div class="state">ganglion &middot; stomach &middot; no controller</div>
+  </div>
+</div>
+
+<section id="wholelobster" style="padding-top:44px">
+  <div class="wrap wide">
+    <div class="eyebrow">the whole lobster</div>
+    <h2>A ganglion, a stomach, and no controller</h2>
+    <p class="lede">The circuit &mdash; the pyloric network of the lobster's stomatogastric ganglion, fourteen neurons whose every synapse was found with paired electrodes and has been redrawn by three generations of hands since &mdash; run as the conductance model of Prinz, Bucher &amp; Marder 2004, in this browser, right now. Between the model and a drawing of the stomach a fixed arithmetic: a cell's firing becomes a muscle's pull, a dilator opens the pylorus, a constrictor closes it. Nothing written by anyone decides the order. Either the wiring makes the rhythm or it does not, and either answer is reported with its numbers.</p>
+
+    <div class="path">
+      <div class="step done"><div class="no">00</div><div class="what">Wiring diagram<em>Fourteen neurons of six types &mdash; AB, PD, LP, PY, VD, IC &mdash; and every chemical synapse between them, all of them inhibitory, plus the gap junctions that make AB and the two PDs one pacemaker. Read from Maynard 1972 through Marder &amp; Bucher 2007, nothing edited.</em></div><div class="tag">done</div></div>
+      <div class="step done" id="s1step"><div class="no">01</div><div class="what">Pyloric rhythm<em>Three model cells, AB/PD, LP and PY, with the circuit's seven synapses, integrated at 0.05&nbsp;ms steps as you read. Period, order and phases are measured on the page as it runs; the rule they are held to is below.</em></div><div class="tag" id="s1tag">live</div></div>
+      <div class="step todo"><div class="no">02</div><div class="what">The stomach<em>The pylorus in the drawing opens under PD and closes under LP and PY, driven by the model's rates. It is a schematic: no muscle, no load, no food. No physical model of a lobster stomach exists to wire to.</em></div><div class="tag">schematic only</div></div>
+      <div class="step todo"><div class="no">03</div><div class="what">The whole lobster<em>No connectome. Nobody has traced a lobster's nervous system from electron micrographs, and at something like a hundred thousand neurons in an animal half a metre long nobody is about to. The rest of the lobster is dark.</em></div><div class="tag">no data</div></div>
+    </div>
+
+    <div class="eyebrow sub">stage 1 &middot; the pyloric rhythm</div>
+    <h2>The ganglion keeps time; nothing tells it to</h2>
+    <p class="lede">Three cells of the Liu et&nbsp;al. 1998 type, one conductance set each after the Prinz et&nbsp;al. 2004 candidates as transcribed in this file, coupled by the seven graded synapses of the reduced pyloric circuit, all inhibitory: glutamatergic from AB, LP and PY, cholinergic from PD. No input, no modulator, no drive. Every number in the board is measured from the model as it runs in your browser; the rule it is held to was fixed before the synapse strengths were searched. The other two pills cut the wiring or silence the pacemaker, and the verdicts follow.</p>
+
+    <div class="term" id="board1">
+      <div class="tbar">
+        <span class="tname">STAGE 1 &middot; PYLORIC RHYTHM</span>
+        <span class="tdim">AB/PD + LP + PY &middot; 7 SYNAPSES &middot; NO INPUT</span>
+        <span class="tpills" role="group" aria-label="Model condition">
+          <button class="pip2 on" type="button" data-mode="coupled">COUPLED</button>
+          <button class="pip2" type="button" data-mode="cut">SYNAPSES CUT</button>
+          <button class="pip2" type="button" data-mode="silenced">PD SILENCED</button>
+        </span>
+        <span class="tspacer"></span>
+        <span class="tdim">LIVE &middot; 0.05 MS STEP</span>
+        <span class="tlive" id="pass">&#9679; PASS = &mdash;</span>
+      </div>
+
+      <div class="tgrid">
+        <div class="tscreen">
+          <canvas id="traces" aria-label="Membrane potential of the three model cells, PD, LP and PY, scrolling as the model runs"></canvas>
+          <div class="turl"><span id="tstat">model time 0.0 s</span><span id="tfps"></span></div>
+        </div>
+
+        <div class="tside">
+          <div class="tblk">
+            <div class="tk">Cycle period, measured live</div>
+            <div class="tbig" id="period">&mdash;</div>
+            <div class="tsub" id="periodsub">WAITING FOR THE FIRST CYCLES</div>
+          </div>
+
+          <div class="tblk">
+            <div class="tk">Verdicts &middot; measured against required</div>
+            <div class="tquad">
+              <div><div class="tql">M1 period 0.5&ndash;2 s, CV &lt; 0.1</div><div class="tqv" id="m1">&mdash;</div></div>
+              <div><div class="tql">M2 one burst per cell per cycle</div><div class="tqv" id="m2">&mdash;</div></div>
+              <div><div class="tql">M3 order PD &rarr; LP &rarr; PY</div><div class="tqv" id="m3">&mdash;</div></div>
+              <div><div class="tql">M4 wiring cut, order lost</div><div class="tqv" id="m4">not run</div></div>
+            </div>
+            <div class="tsub prose"><span class="tdim" id="verdictnote">Phases are fractions of the PD-to-PD cycle. M4 is computed once at load, from 8 s of the same three cells with every synapse at zero.</span></div>
+          </div>
+
+          <div class="tblk">
+            <div class="tk">What each cell did, last cycle</div>
+            <div class="tquad">
+              <div><div class="tql">PD burst</div><div class="tqv" id="c-pd">&mdash;</div></div>
+              <div><div class="tql">LP burst</div><div class="tqv" id="c-lp">&mdash;</div></div>
+              <div><div class="tql">PY burst</div><div class="tqv" id="c-py">&mdash;</div></div>
+              <div><div class="tql">spikes per second, all cells</div><div class="tqv" id="c-rate">&mdash;</div></div>
+            </div>
+          </div>
+
+          <div class="tblk">
+            <div class="tk">The animal, for comparison</div>
+            <div class="tquad">
+              <div><div class="tql">PD off</div><div class="tqv">&asymp; 0.3</div></div>
+              <div><div class="tql">LP on &ndash; off</div><div class="tqv">&asymp; 0.35 &ndash; 0.6</div></div>
+              <div><div class="tql">PY on &ndash; off</div><div class="tqv">&asymp; 0.55 &ndash; 0.95</div></div>
+              <div><div class="tql">period</div><div class="tqv">1 &ndash; 2 s</div></div>
+            </div>
+            <div class="tsub prose"><span class="tdim">Homarus americanus, Bucher, Prinz &amp; Marder 2005, rounded. Typed in, not live.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tfoot">
+        <div><span class="tql">cells</span><span class="tfv">3</span></div>
+        <div><span class="tql">synapses</span><span class="tfv">7</span></div>
+        <div><span class="tql">step</span><span class="tfv">0.05 ms</span></div>
+        <div><span class="tql">model time</span><span class="tfv" id="mt">0 s</span></div>
+        <div><span class="tql">cycles seen</span><span class="tfv" id="ncyc">0</span></div>
+      </div>
+      <div class="tnote"><b>Reading.</b> Under no input at all these three cells settle into a triphasic rhythm with the animal's order, PD then LP then PY, at a period inside the animal's range, and they do so because of the wiring: with the seven synapses at zero the same three cells fire on their own &mdash; the pacemaker bursts, LP and PY fire tonically &mdash; and there is no order to speak of. It is not a finding about the animal's ganglion: what runs here is three cells standing in for fourteen, with strengths chosen by a search, in a model with the limits listed further down.</div>
+    </div>
+
+    <div class="eyebrow sub">the stomach &middot; a schematic, not a body</div>
+    <h2>A stomach that is drawn, and a valve that only proves the wires</h2>
+    <p class="lede">The lobster chews inside its stomach. Three teeth in the gastric mill grind under one rhythm; behind them the pylorus filters and pumps under the other, the one running above. The stomatogastric ganglion sits on the stomach's roof, inside the ophthalmic artery, and most of its thirty cells are motor neurons to those muscles. No physical model of any of this exists. What is shown is a drawing whose pyloric valve opens when the model's PD fires and closes when LP and PY do; it proves that the model reaches the drawing, and nothing else.</p>
+
+    <div class="term">
+      <div class="tbar">
+        <span class="tname">THE STOMACH &middot; SCHEMATIC</span>
+        <span class="tdim">FOREGUT, LATERAL VIEW &middot; PYLORUS DRIVEN BY THE MODEL ABOVE</span>
+        <span class="tpills">
+          <span class="pip2 on">PYLORUS</span>
+          <span class="pip2 off">GASTRIC MILL</span>
+          <span class="pip2 off">CARDIAC SAC</span>
+        </span>
+        <span class="tspacer"></span>
+        <span class="tdim">LIVE &middot; 150 MS MUSCLE FILTER</span>
+        <span class="tlive">&#9679; NOT A RESULT</span>
+      </div>
+
+      <div class="tgrid">
+        <div class="tscreen col">
+          <canvas id="stomach" aria-label="A line drawing of the lobster foregut: oesophagus, cardiac sac, gastric mill with three teeth, and a pylorus whose opening follows the model"></canvas>
+          <div class="tcap">a schematic, not a stomach</div>
+        </div>
+
+        <div class="tside">
+          <div class="tblk">
+            <div class="tk">What happens in one cycle</div>
+            <div class="tquad">
+              <div><div class="tql">dilator (PD) pulling</div><div class="tqv" id="st-pd">&mdash;</div></div>
+              <div><div class="tql">constrictors (LP, PY) pulling</div><div class="tqv" id="st-c">&mdash;</div></div>
+              <div><div class="tql">valve open, peak</div><div class="tqv" id="st-open">&mdash;</div></div>
+              <div><div class="tql">teeth</div><div class="tqv">still</div></div>
+            </div>
+            <div class="tsub prose"><span class="tdim">Fractions of the last PD-to-PD cycle. The valve's gap is the dilator's pull minus the constrictors', clipped to the drawing.</span></div>
+          </div>
+
+          <div class="tblk">
+            <div class="tk">The stomach, from the literature</div>
+            <div class="tquad">
+              <div><div class="tql">regions</div><div class="tqv">3</div></div>
+              <div><div class="tql">teeth</div><div class="tqv">3</div></div>
+              <div><div class="tql">rhythms</div><div class="tqv">2 &middot; &asymp;0.1 and &asymp;1 Hz</div></div>
+              <div><div class="tql">STG cells that are motor neurons</div><div class="tqv">most of &asymp;30</div></div>
+            </div>
+          </div>
+
+          <div class="tblk">
+            <div class="tk">Not computed</div>
+            <div class="tsub prose"><span class="tdim">No muscle, no load, no food, no gastric rhythm. The valve's opening is an arithmetic of three rates and nothing is concluded from it; the teeth do not move because the gastric circuit is not on this page.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tstills">
+        <div><div class="tk">The pyloric circuit, from the literature &middot; reduced to three cells</div><canvas id="circuit" aria-label="Wiring diagram of the three-cell pyloric circuit: AB/PD, LP and PY with seven inhibitory synapses and their strengths"></canvas></div>
+        <div><div class="tk">One cycle &middot; the model's phases against the animal's</div><canvas id="phases" aria-label="Phase diagram of one cycle: model bursts of PD, LP and PY against the animal's approximate ranges"></canvas></div>
+      </div>
+      <div class="tnote"><b>Drawn with the same rates the verdicts use and nothing tuned.</b> Each cell's spikes are low-passed with a 150&nbsp;ms muscle time constant into a pull; the valve's gap is the dilator's pull minus the constrictors', clipped to the drawing. A real pyloric muscle is slow, graded and history-dependent, and the real pylorus has a dozen of them under a dozen motor neurons; that disagreement is stated, not fixed.</div>
+    </div>
+
+    <div class="eyebrow sub">kept off the page</div>
+    <h2>Three things the animal does that this model cannot</h2>
+    <p class="lede">Each is documented in the literature and absent here on purpose, because adding it would mean choosing numbers this page has no measured source for.</p>
+    <div class="path">
+      <div class="step fail"><div class="no">a</div><div class="what">Neuromodulation<em>The ganglion is bathed by blood carrying more than twenty modulators &mdash; dopamine, serotonin, octopamine, proctolin, RPCH, CCAP and others &mdash; and each reconfigures the same cells into a different rhythm; that is the central lesson of forty years of work on this circuit (Marder &amp; Bucher 2007). The model has no modulator, so it has one rhythm and only one.</em></div><div class="tag">not modelled</div></div>
+      <div class="step fail"><div class="no">b</div><div class="what">Temperature<em>In the crab's copy of this circuit the period roughly halves between 7 and 23&nbsp;&deg;C while the phases hold still (Tang et&nbsp;al. 2010). The model runs at whatever temperature its kinetics were measured at and cannot be warmed.</em></div><div class="tag">not modelled</div></div>
+      <div class="step now"><div class="no">c</div><div class="what">Next: the gastric mill<em>The other rhythm of the same ganglion, the one that moves the teeth: LG, MG, DG, the four GMs and Int1, with a period of five to ten seconds. Its wiring is known too. Not yet modelled.</em></div><div class="tag">next</div></div>
+    </div>
+
+    <div class="eyebrow sub">what is measured and what is chosen</div>
+    <h2>Two lists, kept apart</h2>
+    <p class="lede">The page is its own result file; this is the short form of what it separates.</p>
+    <ul class="plain">
+      <li><b>Measured, from the literature.</b> The circuit's membership and the sign of every chemical synapse in it, all inhibitory. The order of the rhythm and the range of its period in the animal. The cells' current kinetics, from voltage clamp of cultured lobster stomatogastric neurons (Liu et&nbsp;al. 1998, after Turrigiano et&nbsp;al. 1995).</li>
+      <li><b>Chosen.</b> Three model cells for fourteen: AB and the two PDs as one, the PY cells as one, VD and IC left out, as Prinz et&nbsp;al. 2004 did. One conductance set per cell, transcribed from that paper's candidates; the transcription is in the source, and any slip in it is this page's, not theirs. The seven synaptic strengths: a few hundred combinations of the values Prinz et&nbsp;al. used, 3 to 100&nbsp;nS, searched in a browser against the phases Bucher et&nbsp;al. 2005 reported, and the closest kept. The pass rule. The 0.05&nbsp;ms step. The arithmetic that turns a rate into a pull and a pull into the drawing's gap.</li>
+      <li><b>Not possible from the literature.</b> A lobster connectome; a count of the lobster's neurons &mdash; estimates exist, counts do not; the modulatory state of any particular animal at any particular moment.</li>
+    </ul>
+
+    <div class="eyebrow sub">what the model is not</div>
+    <h2>Any one of these could make or abolish the rhythm</h2>
+    <p class="lede">None of them is the measured wiring. Each is a simplification the page inherits from the published model or adds on its own, and the result file &mdash; this page &mdash; carries the same list.</p>
+    <ul class="plain">
+      <li><b>Three cells for fourteen.</b> AB and the two PDs are one cell, so their gap junctions do not exist; the five to eight PYs are one cell; VD and IC are absent, and so is everything they do.</li>
+      <li><b>Graded synapses only.</b> Transmission follows the presynaptic voltage through a sigmoid at &minus;35&nbsp;mV; there are no spike-mediated synapses, and every synapse of one type has the same reversal, &minus;70&nbsp;mV glutamatergic, &minus;80&nbsp;mV cholinergic.</li>
+      <li><b>Identical kinetics.</b> One set of eight currents for all three cells &mdash; I<sub>Na</sub>, I<sub>CaT</sub>, I<sub>CaS</sub>, I<sub>A</sub>, I<sub>KCa</sub>, I<sub>Kd</sub>, I<sub>H</sub> and a leak &mdash; differing only in their maximal conductances. Fitted to cultured cells, which are not the cells in the ganglion.</li>
+      <li><b>No modulators, no temperature, no gastric mill.</b> The circuit that in the animal is never without them runs here without any of them.</li>
+      <li><b>A stomach with no muscles.</b> The drawing's pull is a low-passed rate, with no length&ndash;tension curve, no load and no food, and the valve gap is one line of arithmetic on it.</li>
+    </ul>
+
+    <div class="eyebrow sub">the sources</div>
+    <div class="wires">
+      <div class="wire"><div class="cell" id="src-cell">this page &middot; ctrl+U</div><div class="role">The model, the search, the drawing and every number on this page are in this one file. There is no server between you and it; view the source and every constant is there.</div></div>
+      <div class="wire"><div class="cell"><a href="https://doi.org/10.1038/nn1352">Prinz, Bucher &amp; Marder 2004</a></div><div class="role">The model: the cell, the seven synapses and the database of twenty million networks whose candidates this page's three cells and seven strengths were drawn from.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="cabar">
+  <div class="wrap cain">
+    <div>
+      <div class="calabel">Contract address &middot; <span id="ca-ticker">$LOBSTERBRAIN</span></div>
+      <div class="caval" id="ca-text">&mdash;</div>
+    </div>
+    <button class="copy" id="ca-copy" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="9" y="9" width="12" height="12" rx="2"></rect>
+        <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"></path>
+      </svg>
+      <span id="ca-copy-t">Copy</span>
+    </button>
+    <span id="ca-live" role="status" aria-live="polite" class="sr">&nbsp;</span>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">what it is</div>
+    <h2>A real circuit, not a metaphor</h2>
+    <p class="lede">Every connection in the pyloric circuit was found with two glass electrodes in the stomach ganglion of an actual lobster, one pair of cells at a time, and has been checked by every lab that has worked on it since. Nothing is inferred from a stain, nothing is sampled from a distribution, and it is not a neural network &ldquo;inspired by&rdquo; a brain.</p>
+    <p>The stomatogastric ganglion of <em style="font-family:var(--serif);font-style:italic">Homarus americanus</em> holds about thirty neurons, most of them motor neurons to the stomach's muscles, and two circuits in one: the pyloric network of fourteen cells that runs at about a cycle a second, and the gastric mill network that moves the teeth once every five to ten seconds. It is the circuit on which the field learned that a wiring diagram is not enough &mdash; the same cells, under different modulators, produce different rhythms &mdash; and it is, by common consent, the best-understood circuit of any animal. The cells here are the Liu, Golowasch, Abbott &amp; Marder 1998 model; the circuit is the three-cell reduction of Prinz, Bucher &amp; Marder 2004; the comparison numbers are from Bucher, Prinz &amp; Marder 2005.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">before this</div>
+    <h2>The lobster was mapped first</h2>
+    <p class="lede">Decades before anyone sliced a fly into electron-microscope sections, the lobster's stomach circuit was drawn by hand from paired recordings &mdash; Maynard 1972, Mulloney &amp; Selverston 1974, Selverston &amp; Moulins 1987 &mdash; and it has been the reference circuit of neuroscience ever since.</p>
+    <p>This site follows the fly's. That one wired a measured nervous system to a measured body and reported that, under a model that simple, the body did not move. This one starts from the other end: a circuit small enough to be known completely, whose whole job is one rhythm, and asks whether the wiring alone makes it. So far the answer is yes, in the numbers above, with every caveat beside them.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">on-chain</div>
+    <h2 id="oc-ticker">$LOBSTERBRAIN</h2>
+    <p class="lede" id="oc-lede">Launched on <span id="oc-chain">the chain named in the corner</span>. Read the receipt yourself rather than taking this page's word for it.</p>
+    <div class="scroll"><table>
+      <tr><th>Contract</th><td class="addr" id="t-ca">&mdash;</td></tr>
+      <tr><th>Paired</th><td class="num" id="t-pair">&mdash;</td></tr>
+      <tr><th>Creator tax</th><td class="num" id="t-tax">&mdash;</td></tr>
+      <tr><th>Supply</th><td class="num" id="t-sup">&mdash;</td></tr>
+      <tr><th>Chain</th><td class="num" id="t-chain">&mdash;</td></tr>
+    </table></div>
+    <p style="margin-top:22px"><a id="t-link" href="#">open on the launchpad</a></p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">what is not real, stated plainly</div>
+    <h2>The parts that aren't the lobster</h2>
+    <ul class="plain">
+      <li><b>The stomach does not chew on this page.</b> Nothing here shows a lobster's stomach moving, because there is no stomach: the drawing is a schematic driven by three rates, and the teeth in it do not move at all. If a physical model ever exists, the numbers will say what it did.</li>
+      <li><b>It cannot read.</b> A stomach ganglion has no language and no plan. It did not choose a word on this page, did not form a view about anything, and is not steering anything. Nothing it does is a message.</li>
+      <li><b>The voice is a narrator.</b> Every post on X in the lobster's name is written by a language model that is handed the page's telemetry and asked to write in the first person. Every number in a draft is checked against that packet before it goes out, and a draft with a number that is not in the packet is thrown away. The circuit is real; the words, and any &ldquo;appetite&rdquo; in them, are the narrator's.</li>
+      <li><b>Measured and chosen are kept apart.</b> The wiring, its signs and the animal's phases are read from the papers. Which cells stand in for which, how strong each synapse is, how a rate becomes a pull, and what counts as a pass were decided by a person and written down before the page ran. The lists above are the short form; the source has all of it.</li>
+      <li><b>The rhythm is live; the comparisons are copied.</b> Every number in the rhythm board is measured from the model as it runs in your browser and will differ from another machine's only in the last digit and the moment of reading. The animal's phases and everything else from the literature were typed in as the papers stood on 2026-09-13, and the page polls nothing but the chain.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="links" id="f-links">
+      <a id="f-x" href="#" hidden>@handle</a>
+      <a id="f-src" href="#" hidden>source</a>
+      <a id="f-scan" href="#" hidden>explorer</a>
+      <a href="https://doi.org/10.1038/nn1352">the model</a>
+    </div>
+    <div><span class="pill"><span class="pip" id="pip"></span><span id="pip-t">reading the chain</span></span></div>
+    <p style="margin-top:22px;max-width:66ch" id="f-credit">The pyloric circuit is the work of many hands since Maynard 1972; the cells follow Liu et&nbsp;al. 1998 and the network Prinz, Bucher &amp; Marder 2004; the comparison numbers are Bucher, Prinz &amp; Marder 2005. Not affiliated with any of them, nor with any launchpad or chain. $LOBSTERBRAIN is an art experiment, not an investment.</p>
+  </div>
+</footer>
+
+<script>
+/* ===========================================================================
+   CONFIG - the only block a launch needs to touch.
+   Leave `token` empty until the contract exists; the page then says so
+   instead of pretending. `rpc` must be an EVM JSON-RPC endpoint that answers
+   CORS; set it to '' for a non-EVM chain and the page shows the static facts.
+=========================================================================== */
+const CONFIG = {
+  ticker:   'LOBSTERBRAIN',
+  chain:    { name: 'Robinhood Chain', id: 4663,
+              rpc: 'https://rpc.mainnet.chain.robinhood.com',
+              explorer: 'https://robinhoodchain.blockscout.com/token/' },
+  token:    '',                 // 0x... once launched
+  pair:     '—',                // e.g. 'GOOGL'
+  creatorTax: '—',              // e.g. '1.00 %'
+  supply:   '—',                // e.g. '1 000 000 000'
+  launchpad: '',                // e.g. 'https://www.ponsfamily.com/launchpad/0x...'
+  x:        '',                 // e.g. 'https://x.com/lobsterbraindev'
+  source:   '',                 // e.g. 'https://github.com/you/lobsterbrain'
+};
+
+/* ---------------------------------------------------------------------------
+   The lobster.
+
+   A point cloud built from gaussian shells and tubes - carapace, six abdominal
+   segments, tail fan, two chelipeds with a crusher and a cutter, eight walking
+   legs, antennae, antennules, eyes and swimmerets - so it reads as a specimen
+   rather than a logo. It is drawn, not traced: there is no path data anywhere
+   in this file. Axes: +x forward, +y dorsal, +z the animal's right.
+--------------------------------------------------------------------------- */
+const N = 15000;
+function buildLobster(n){
+  const P = new Float32Array(n*3), R = Math.random;
+  const gauss = () => { let u=0,v=0; while(!u)u=R(); while(!v)v=R();
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); };
+  let i = 0;
+  const put = (x,y,z) => { if(i>=n) return; P[i*3]=x; P[i*3+1]=y; P[i*3+2]=z; i++; };
+  const K = f => Math.floor(n*f);
+  // an ellipsoid, on its surface (shell) or filled
+  const ell = (cx,cy,cz,rx,ry,rz,k,shell) => { for(let j=0;j<k;j++){
+    let x=gauss(), y=gauss(), z=gauss();
+    const d = Math.hypot(x,y,z)||1; x/=d; y/=d; z/=d;
+    const r = shell ? 0.86+0.14*R() : Math.cbrt(R());
+    put(cx+x*rx*r, cy+y*ry*r, cz+z*rz*r); } };
+  // a limb segment: a tube from a to b of radius r, thinning to r*taper at b
+  const tube = (ax,ay,az,bx,by,bz,r,k,taper=1) => { for(let j=0;j<k;j++){
+    const t=R(), rr=r*(1-(1-taper)*t);
+    put(ax+(bx-ax)*t+gauss()*rr, ay+(by-ay)*t+gauss()*rr, az+(bz-az)*t+gauss()*rr); } };
+  // a flat blade in the x-z plane (tail fan), turned by `ang` about the vertical
+  const blade = (cx,cy,cz,rx,rz,ang,k) => { const c=Math.cos(ang), s=Math.sin(ang);
+    for(let j=0;j<k;j++){ const a=R()*Math.PI*2, r=Math.sqrt(R());
+      const x=Math.cos(a)*rx*r, z=Math.sin(a)*rz*r;
+      put(cx+x*c-z*s, cy+gauss()*0.004, cz+x*s+z*c); } };
+
+  // cephalothorax, rostrum, eyes
+  ell( 0.18, 0.06, 0,  0.30, 0.125, 0.135, K(0.19), true);
+  tube(0.46, 0.09, 0,  0.61, 0.11, 0,  0.014, K(0.01), 0.15);
+  for (const s of [1,-1]) {
+    ell(0.47, 0.10, s*0.075, 0.028, 0.028, 0.028, K(0.012), false);
+    // antennule, short and forward; antenna, longer than the body, sweeping out
+    tube(0.49, 0.10, s*0.03, 0.72, 0.13, s*0.10, 0.005, K(0.006), 0.4);
+    const ka = K(0.025);
+    for (let j=0;j<ka;j++){ const t=R();
+      put(0.48+0.95*t+gauss()*0.006, 0.08+0.02*t-0.10*t*t+gauss()*0.006,
+          s*(0.06+0.30*t+0.25*t*t)+gauss()*0.006); }
+  }
+
+  // chelipeds, held forward: the left claw is the crusher, broad; the right the cutter, slim
+  for (const s of [1,-1]) {
+    const crusher = s>0, zc = s*0.26;
+    tube(0.36,-0.03,s*0.11, 0.50,-0.04,s*0.21, 0.036, K(0.018));
+    tube(0.50,-0.04,s*0.21, 0.58,-0.02,s*0.25, 0.040, K(0.012));
+    ell(0.78,-0.01,zc, 0.21, crusher?0.10:0.075, crusher?0.135:0.10, K(crusher?0.065:0.05), true);
+    tube(0.96,-0.01,zc-s*0.045, 1.12, 0.00,zc-s*0.055, 0.022, K(0.011), 0.3);
+    tube(0.96, 0.00,zc+s*0.050, 1.12, 0.01,zc+s*0.060, 0.020, K(0.011), 0.3);
+  }
+
+  // four pairs of walking legs, the front two reaching forward, the back two aft
+  for (let L=0; L<8; L++) {
+    const s = L<4?1:-1, seg = L%4;
+    const bx = 0.30-seg*0.13, dir = seg<2?0.06:-0.06;
+    tube(bx,-0.07,s*0.11, bx+dir,-0.03,s*0.26, 0.012, K(0.0055));
+    tube(bx+dir,-0.03,s*0.26, bx+dir*2,-0.21,s*0.37, 0.011, K(0.0055), 0.5);
+  }
+
+  // abdomen, six overlapping segments that taper toward the tail
+  for (let k=0;k<6;k++) {
+    ell(-0.16-k*0.115, 0.03-k*0.004, 0, 0.068, 0.10-k*0.007, 0.125-k*0.008, K(0.03), true);
+  }
+  // tail fan: telson between two uropods a side
+  blade(-0.90, 0.0, 0,      0.12, 0.055, 0,      K(0.018));
+  for (const s of [1,-1]) {
+    blade(-0.88, 0.0, s*0.11, 0.12, 0.05, s*0.22, K(0.015));
+    blade(-0.86, 0.0, s*0.20, 0.12, 0.05, s*0.45, K(0.015));
+    // swimmerets under the abdomen
+    for (let k=0;k<5;k++) { const x=-0.20-k*0.115;
+      tube(x,-0.08,s*0.05, x-0.04,-0.17,s*0.10, 0.008, K(0.0035), 0.5); }
+  }
+  while (i<n) put(gauss()*0.7, gauss()*0.2, gauss()*0.35);
+  return P;
+}
+
+const LOB = buildLobster(N);
+const heat = new Float32Array(N);
+const cv = document.getElementById('lobster');
+const cx = cv.getContext('2d', {alpha:false});
+/* A lobster is read from above and a little to the side - dead side-on the
+   claws hide the body, dead top-down it flattens. The camera sits 44 degrees
+   up; the specimen sways about the vertical and the pointer nudges it. */
+let t = 0, pointer = 0, targetPointer = 0;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const PITCH = 44*Math.PI/180, CP = Math.cos(PITCH), SP = Math.sin(PITCH);
+
+function fit(){
+  const r = cv.getBoundingClientRect(), d = Math.min(devicePixelRatio||1, 2);
+  cv.width = Math.max(2, Math.floor(r.width*d));
+  cv.height = Math.max(2, Math.floor(r.height*d));
+}
+addEventListener('resize', fit);
+addEventListener('pointermove', e => {
+  targetPointer = (e.clientX / innerWidth - 0.5) * 0.55;
+});
+
+function drawLobster(){
+  const W = cv.width, H = cv.height;
+  cx.fillStyle = '#06070a';
+  cx.fillRect(0,0,W,H);
+  pointer += (targetPointer - pointer) * 0.04;
+  const ang = Math.sin(t * 0.19) * 0.30 + pointer;
+  const ct = Math.cos(ang), st = Math.sin(ang);
+  const phone = innerWidth < 640;
+  const S = Math.min(W * (phone ? 0.34 : 0.40), H * (phone ? 0.62 : 0.47));
+  const bob = reduced ? 0 : Math.sin(t * 0.9) * H * 0.008;
+  const cyOff = H * (phone ? 0.50 : 0.32);
+  const dpr = Math.min(devicePixelRatio||1, 2);
+
+  for (let i=0;i<N;i++){
+    const x = LOB[i*3]-0.10, y = LOB[i*3+1], z = LOB[i*3+2];
+    const dx = x*ct - z*st;               // yaw about the vertical
+    const dz = x*st + z*ct;
+    const sy = y*CP - dz*SP;              // screen-up after the camera pitch
+    const dep = y*SP + dz*CP;             // toward the camera
+    const X = W/2 - dx*S;                 // claws to the left, as in the wordmark
+    const Y = cyOff - sy*S + bob;
+    const depth = Math.max(0, Math.min(1, (dep + 0.55) * 0.9));
+    const h = heat[i];
+    const a = 0.24 + depth*0.55 + h*0.9;
+    const r = (0.62 + depth*0.95 + h*1.7) * dpr;
+    cx.globalAlpha = Math.min(1, a);
+    cx.fillStyle = h > 0.25 ? '#9eecff' : (depth > 0.58 ? '#e8f4fb' : '#6ba2bd');
+    cx.fillRect(X, Y, r, r);
+    if (h > 0) heat[i] = h - 0.022;
+  }
+  cx.globalAlpha = 1;
+
+  if (!reduced) {
+    t += 0.016;
+    for (let k=0;k<16;k++) heat[(Math.random()*N)|0] = 0.35 + Math.random()*0.5;
+  }
+  requestAnimationFrame(drawLobster);
+}
+fit();
+for (let k=0;k<400;k++) heat[(Math.random()*N)|0] = Math.random()*0.5;
+drawLobster();
+
+/* ---------------------------------------------------------------------------
+   The ganglion.
+
+   Three Liu et al. 1998 model cells - eight currents, calcium, one parameter
+   set each from the candidates of Prinz, Bucher & Marder 2004 - joined by the
+   seven graded inhibitory synapses of their reduced pyloric circuit. Forward
+   Euler on the voltage, exponential Euler on the gates, 0.05 ms. Units: mV,
+   ms, mS/cm2, uM; capacitance 1 uF/cm2 over 0.628e-3 cm2.
+--------------------------------------------------------------------------- */
+const STG = (() => {
+  const ex = Math.exp;
+  const E = {Na:50, K:-80, H:-20, L:-50};
+  // maximal conductances, mS/cm2, transcribed after Prinz 2004's candidates (AB/PD 3, LP 2, PY 4)
+  const G = {
+    PD: {Na:200, CaT:2.5, CaS:4, A:50, KCa:5, Kd:50,  H:0.01, L:0.00},
+    LP: {Na:100, CaT:0,   CaS:6, A:30, KCa:5, Kd:50,  H:0.05, L:0.02},
+    PY: {Na:400, CaT:2.5, CaS:2, A:50, KCa:0, Kd:75,  H:0.05, L:0.00},
+  };
+  // the seven synapses, nS. glutamatergic: E -70 mV, k 1/40 ms; cholinergic: E -80, 1/100.
+  // Strengths found by a search of Prinz's grid (3..100 nS) against Bucher 2005 phases.
+  const SYN = [
+    {pre:0, post:1, g:10, glut:true },   // AB -> LP
+    {pre:0, post:1, g:3,  glut:false},   // PD -> LP
+    {pre:0, post:2, g:30, glut:true },   // AB -> PY
+    {pre:0, post:2, g:10, glut:false},   // PD -> PY
+    {pre:1, post:0, g:30, glut:true },   // LP -> PD
+    {pre:1, post:2, g:3,  glut:true },   // LP -> PY
+    {pre:2, post:1, g:10, glut:true },   // PY -> LP
+  ];
+  const NS = 1e-3/0.628;               // nS * mV  ->  uA/cm2
+  const DT = 0.05;
+  const NAMES = ['PD','LP','PY'];
+
+  function cell(g, V){ return {g, V, Ca:0.05, mNa:0,hNa:1, mCaT:0,hCaT:1, mCaS:0,hCaS:1,
+    mA:0,hA:1, mKCa:0, mKd:0, mH:0}; }
+  function stepCell(c, Isyn){
+    const V=c.V, Ca=c.Ca, g=c.g, dt=DT;
+    const mNa_i=1/(1+ex((V+25.5)/-5.29)), tmNa=1.32-1.26/(1+ex((V+120)/-25));
+    const hNa_i=1/(1+ex((V+48.9)/5.18)), thNa=(0.67/(1+ex((V+62.9)/-10)))*(1.5+1/(1+ex((V+34.9)/3.6)));
+    const mCaT_i=1/(1+ex((V+27.1)/-7.2)), tmCaT=43.4-42.6/(1+ex((V+68.1)/-20.5));
+    const hCaT_i=1/(1+ex((V+32.1)/5.5)), thCaT=210-179.6/(1+ex((V+55)/-16.9));
+    const mCaS_i=1/(1+ex((V+33)/-8.1)), tmCaS=2.8+14/(ex((V+27)/10)+ex((V+70)/-13));
+    const hCaS_i=1/(1+ex((V+60)/6.2)), thCaS=120+300/(ex((V+55)/9)+ex((V+65)/-16));
+    const mA_i=1/(1+ex((V+27.2)/-8.7)), tmA=23.2-20.8/(1+ex((V+32.9)/-15.2));
+    const hA_i=1/(1+ex((V+56.9)/4.9)), thA=77.2-58.4/(1+ex((V+38.9)/-26.5));
+    const mKCa_i=(Ca/(Ca+3))/(1+ex((V+28.3)/-12.6)), tmKCa=180.6-150.2/(1+ex((V+46)/-22.7));
+    const mKd_i=1/(1+ex((V+12.3)/-11.8)), tmKd=14.4-12.8/(1+ex((V+28.3)/-19.2));
+    const mH_i=1/(1+ex((V+75)/5.5)), tmH=2/(ex((V+169.7)/-11.6)+ex((V-26.7)/14.3));
+    const upd=(x,xi,tau)=>xi+(x-xi)*ex(-dt/tau);
+    c.mNa=upd(c.mNa,mNa_i,tmNa);   c.hNa=upd(c.hNa,hNa_i,thNa);
+    c.mCaT=upd(c.mCaT,mCaT_i,tmCaT); c.hCaT=upd(c.hCaT,hCaT_i,thCaT);
+    c.mCaS=upd(c.mCaS,mCaS_i,tmCaS); c.hCaS=upd(c.hCaS,hCaS_i,thCaS);
+    c.mA=upd(c.mA,mA_i,tmA);       c.hA=upd(c.hA,hA_i,thA);
+    c.mKCa=upd(c.mKCa,mKCa_i,tmKCa); c.mKd=upd(c.mKd,mKd_i,tmKd); c.mH=upd(c.mH,mH_i,tmH);
+    const ECa=12.199*Math.log(3000/Ca);
+    const ICaT=g.CaT*c.mCaT**3*c.hCaT*(V-ECa);
+    const ICaS=g.CaS*c.mCaS**3*c.hCaS*(V-ECa);
+    const Iion = g.Na*c.mNa**3*c.hNa*(V-E.Na) + ICaT + ICaS
+               + g.A*c.mA**3*c.hA*(V-E.K) + g.KCa*c.mKCa**4*(V-E.K)
+               + g.Kd*c.mKd**4*(V-E.K) + g.H*c.mH*(V-E.H) + g.L*(V-E.L);
+    c.V = V - dt*(Iion + Isyn);
+    c.Ca = Ca + dt*(-14.96*(ICaT+ICaS)*0.628 - Ca + 0.05)/200;
+    if (c.Ca < 1e-6) c.Ca = 1e-6;
+  }
+  function synStep(s, Vpre, k){
+    const si=1/(1+ex((-35-Vpre)/5)); const tau=(1-si)/k;
+    return si+(s-si)*ex(-DT/Math.max(tau,0.01));
+  }
+
+  function makeNet(){
+    return { cells:[cell(G.PD,-50), cell(G.LP,-55), cell(G.PY,-60)],
+             s:new Float64Array(SYN.length), t:0, mode:'coupled',
+             // spike and burst records, per cell
+             above:[false,false,false], bursts:[[],[],[]], nSpikes:[0,0,0],
+             pull:[0,0,0] };
+  }
+  const BURST_GAP = 100;   // ms without a spike ends a burst
+  function record(net){
+    for (let c=0;c<3;c++){
+      const V = net.cells[c].V;
+      if (!net.above[c] && V > -10){
+        net.above[c] = true; net.nSpikes[c]++;
+        const B = net.bursts[c], last = B[B.length-1];
+        if (last && net.t - last.last <= BURST_GAP){ last.last = net.t; last.n++; }
+        else { B.push({start:net.t, last:net.t, n:1}); if (B.length > 40) B.shift(); }
+      } else if (net.above[c] && V < -30) net.above[c] = false;
+    }
+  }
+  function stepNet(net){
+    const c = net.cells, cut = net.mode === 'cut';
+    let I = [0,0,0];
+    for (let k=0;k<SYN.length;k++){
+      const sy = SYN[k];
+      net.s[k] = synStep(net.s[k], c[sy.pre].V, sy.glut ? 1/40 : 1/100);
+      if (!cut) I[sy.post] += NS * sy.g * net.s[k] * (c[sy.post].V - (sy.glut ? -70 : -80));
+    }
+    stepCell(c[0], I[0]); stepCell(c[1], I[1]); stepCell(c[2], I[2]);
+    if (net.mode === 'silenced') c[0].V = -60;     // the pacemaker held down
+    net.t += DT;
+    record(net);
+  }
+
+  /* Cycles are PD burst to PD burst. Phases of LP and PY are their burst
+     on/off as fractions of that cycle; a cell that bursts twice in a cycle
+     counts twice, which is what M2 is for. */
+  function cycles(net, howMany){
+    const pd = net.bursts[0], out = [];
+    for (let i=pd.length-2; i>=0 && out.length<howMany; i--){
+      const t0 = pd[i].start, t1 = pd[i+1].start, T = t1-t0;
+      const inCyc = B => B.filter(b => b.start >= t0 && b.start < t1);
+      const lp = inCyc(net.bursts[1]), py = inCyc(net.bursts[2]);
+      out.unshift({ t0, t1, T,
+        pdOff: (pd[i].last-t0)/T, pdN: pd[i].n,
+        lpN: lp.length, lpOn: lp.length ? (lp[0].start-t0)/T : NaN,
+        lpOff: lp.length ? (lp[lp.length-1].last-t0)/T : NaN, lpSp: lp.reduce((a,b)=>a+b.n,0),
+        pyN: py.length, pyOn: py.length ? (py[0].start-t0)/T : NaN,
+        pyOff: py.length ? (py[py.length-1].last-t0)/T : NaN, pySp: py.reduce((a,b)=>a+b.n,0) });
+    }
+    return out;
+  }
+  function verdict(net){
+    const cyc = cycles(net, 5);
+    if (cyc.length < 3) return {ready:false, cyc};
+    const P = cyc.reduce((a,c)=>a+c.T,0)/cyc.length;
+    const cv = Math.sqrt(cyc.reduce((a,c)=>a+(c.T-P)**2,0)/cyc.length)/P;
+    const last3 = cyc.slice(-3);
+    const m1 = P >= 500 && P <= 2000 && cv < 0.1;
+    const m2 = last3.every(c => c.lpN === 1 && c.pyN === 1);
+    const m3 = last3.every(c => c.lpN >= 1 && c.pyN >= 1 && c.lpOn > c.pdOff && c.pyOn >= c.lpOn && c.pyOff > c.lpOff && c.pyOff <= 1.0);
+    return {ready:true, cyc, P, cv, m1, m2, m3, last: cyc[cyc.length-1]};
+  }
+  // an offline run of `ms` model time, for M4; pass a net to continue one
+  function runOffline(mode, ms, net){
+    net = net || makeNet(); net.mode = mode;
+    const n = Math.round(ms/DT);
+    for (let i=0;i<n;i++) stepNet(net);
+    return net;
+  }
+  return {makeNet, stepNet, verdict, cycles, runOffline, DT, NAMES, SYN, G};
+})();
+
+/* ---------------------------------------------------------------------------
+   The boards. One live net feeds the trace screen, the verdicts, the stomach
+   drawing and the phase still. Model time runs at real time, capped so a
+   backgrounded tab does not try to catch up all at once.
+--------------------------------------------------------------------------- */
+const net = STG.makeNet();
+const SAMPLE_MS = 1, WINDOW_MS = 5000;
+const hist = [new Float32Array(WINDOW_MS).fill(-55), new Float32Array(WINDOW_MS).fill(-55), new Float32Array(WINDOW_MS).fill(-55)];
+let histHead = 0, sampleAcc = 0, m4 = null;
+const $ = id => document.getElementById(id);
+const fmt = (v, d=2) => Number.isFinite(v) ? v.toFixed(d) : '—';
+const pull = [0,0,0];                       // muscle pulls, 150 ms low-pass of firing
+const valveGap = () => Math.max(0.012, Math.min(0.13, 0.045 + 0.11*pull[0] - 0.07*(pull[1]+pull[2])));
+let gapPeakCur = 0, gapPeakLast = NaN, pdBurstsSeen = 0;   // the valve's widest opening, per cycle
+
+function advance(msReal){
+  const steps = Math.round(msReal / STG.DT);
+  for (let i=0;i<steps;i++){
+    STG.stepNet(net);
+    // muscle: fires above -20 mV, relaxes with tau 150 ms
+    for (let c=0;c<3;c++){ const f = net.cells[c].V > -20 ? 1 : 0;
+      pull[c] += STG.DT * ((f ? 0.06 : 0) - pull[c]/150); if (pull[c] > 1) pull[c] = 1; }
+    sampleAcc += STG.DT;
+    if (sampleAcc >= SAMPLE_MS){ sampleAcc -= SAMPLE_MS;
+      for (let c=0;c<3;c++) hist[c][histHead] = net.cells[c].V;
+      histHead = (histHead+1) % WINDOW_MS;
+      const g = valveGap(); if (g > gapPeakCur) gapPeakCur = g;
+      const nb = net.bursts[0].length + (net.bursts[0].length < pdBurstsSeen ? 1e9 : 0);
+      if (nb !== pdBurstsSeen){ gapPeakLast = pdBurstsSeen ? gapPeakCur : NaN; gapPeakCur = 0; pdBurstsSeen = net.bursts[0].length; } }
+  }
+}
+
+function sizeCanvas(c){
+  const r = c.getBoundingClientRect(), d = Math.min(devicePixelRatio||1, 2);
+  const w = Math.max(2, Math.floor(r.width*d)), h = Math.max(2, Math.floor(r.height*d));
+  if (c.width !== w || c.height !== h){ c.width = w; c.height = h; }
+  return d;
+}
+const G_ = '#3dff88', G_DIM = '#1f8f4d', G_FAINT = '#155c33', AMBER = '#e8c15f', RED = '#ff8b7a';
+
+const trc = $('traces'), trx = trc.getContext('2d');
+function drawTraces(){
+  const d = sizeCanvas(trc), W = trc.width, H = trc.height;
+  trx.fillStyle = '#000'; trx.fillRect(0,0,W,H);
+  const rows = 3, padL = 34*d, padT = 14*d, padB = 26*d;
+  const rowH = (H - padT - padB) / rows;
+  trx.font = `${10*d}px "IBM Plex Mono", monospace`;
+  for (let c=0;c<3;c++){
+    const y0 = padT + c*rowH, base = y0 + rowH*0.92, span = rowH*0.86;
+    // baseline at -50 mV, dotted
+    trx.strokeStyle = G_FAINT; trx.setLineDash([2*d, 4*d]); trx.lineWidth = 1;
+    const yb = base - ((-50+80)/120)*span;
+    trx.beginPath(); trx.moveTo(padL, yb); trx.lineTo(W, yb); trx.stroke(); trx.setLineDash([]);
+    trx.fillStyle = G_DIM; trx.fillText(STG.NAMES[c], 8*d, y0 + rowH*0.55);
+    trx.strokeStyle = c === 0 ? G_ : (c === 1 ? AMBER : '#bfffd6'); trx.lineWidth = 1.2*d;
+    trx.beginPath();
+    const n = WINDOW_MS, xs = (W - padL) / n;
+    for (let k=0;k<n;k++){
+      const v = hist[c][(histHead + k) % n];
+      const x = padL + k*xs, y = base - ((v+80)/120)*span;
+      if (k === 0) trx.moveTo(x, y); else trx.lineTo(x, y);
+    }
+    trx.stroke();
+  }
+  // a one-second scale bar and the mode
+  const xs = (W - padL) / WINDOW_MS;
+  trx.strokeStyle = G_DIM; trx.lineWidth = 2*d;
+  trx.beginPath(); trx.moveTo(W - 1000*xs - 12*d, H - 12*d); trx.lineTo(W - 12*d, H - 12*d); trx.stroke();
+  trx.fillStyle = G_DIM; trx.textAlign = 'right';
+  trx.fillText('1 s', W - 12*d, H - 16*d);
+  trx.textAlign = 'left';
+  trx.fillStyle = G_FAINT;
+  trx.fillText('-80 .. +40 mV · ' + (net.mode === 'coupled' ? 'coupled' : net.mode === 'cut' ? 'synapses cut' : 'PD held at -60 mV'), padL, H - 14*d);
+}
+
+/* The stomach: oesophagus, cardiac sac, gastric mill with its three teeth,
+   pylorus, midgut. Only the pylorus moves, and it moves by arithmetic. */
+const stc = $('stomach'), stx = stc.getContext('2d');
+function drawStomach(){
+  const d = sizeCanvas(stc), W = stc.width, H = stc.height;
+  stx.fillStyle = '#000'; stx.fillRect(0,0,W,H);
+  const X = f => f*W, Y = f => f*H;
+  const gap = valveGap();
+  stx.lineWidth = 1.3*d; stx.strokeStyle = G_; stx.lineJoin = 'round'; stx.lineCap = 'round';
+  // outline: top wall, left to right
+  stx.beginPath();
+  stx.moveTo(X(0.20), Y(0.86));                 // oesophagus, from below
+  stx.lineTo(X(0.20), Y(0.58));
+  stx.bezierCurveTo(X(0.16),Y(0.30), X(0.22),Y(0.18), X(0.36),Y(0.18));   // cardiac sac roof
+  stx.bezierCurveTo(X(0.46),Y(0.18), X(0.52),Y(0.24), X(0.58),Y(0.28));   // over the mill
+  stx.bezierCurveTo(X(0.64),Y(0.32), X(0.66),Y(0.50-gap), X(0.72),Y(0.50-gap)); // into the pylorus
+  stx.lineTo(X(0.86), Y(0.50-gap));
+  stx.bezierCurveTo(X(0.90),Y(0.50-gap), X(0.92),Y(0.46), X(0.97),Y(0.46));     // midgut
+  stx.stroke();
+  // bottom wall
+  stx.beginPath();
+  stx.moveTo(X(0.27), Y(0.86));
+  stx.lineTo(X(0.27), Y(0.66));
+  stx.bezierCurveTo(X(0.30),Y(0.74), X(0.40),Y(0.78), X(0.50),Y(0.72));   // cardiac sac floor
+  stx.bezierCurveTo(X(0.56),Y(0.68), X(0.60),Y(0.62), X(0.66),Y(0.58));   // floor of the mill
+  stx.bezierCurveTo(X(0.68),Y(0.56), X(0.68),Y(0.50+gap), X(0.72),Y(0.50+gap));
+  stx.lineTo(X(0.86), Y(0.50+gap));
+  stx.bezierCurveTo(X(0.90),Y(0.50+gap), X(0.92),Y(0.54), X(0.97),Y(0.54));
+  stx.stroke();
+  // the three teeth of the gastric mill: one medial from the roof, two lateral below
+  stx.strokeStyle = G_DIM;
+  stx.beginPath(); stx.moveTo(X(0.51),Y(0.24)); stx.lineTo(X(0.535),Y(0.42)); stx.lineTo(X(0.56),Y(0.27)); stx.stroke();
+  stx.beginPath(); stx.moveTo(X(0.48),Y(0.70)); stx.lineTo(X(0.50),Y(0.52)); stx.lineTo(X(0.53),Y(0.68)); stx.stroke();
+  stx.beginPath(); stx.moveTo(X(0.56),Y(0.66)); stx.lineTo(X(0.585),Y(0.50)); stx.lineTo(X(0.61),Y(0.62)); stx.stroke();
+  // the ganglion on the roof, inside the artery, and its three model cells
+  const gx = X(0.47), gy = Y(0.09);
+  stx.strokeStyle = G_DIM; stx.setLineDash([3*d,3*d]);
+  stx.beginPath(); stx.moveTo(X(0.05), gy); stx.lineTo(X(0.97), gy); stx.stroke(); stx.setLineDash([]);
+  stx.strokeStyle = G_; stx.beginPath(); stx.ellipse(gx, gy, 0.075*W, 0.05*H, 0, 0, Math.PI*2); stx.stroke();
+  const cellsXY = [[gx-0.04*W, gy],[gx, gy],[gx+0.04*W, gy]];
+  for (let c=0;c<3;c++){
+    const act = Math.max(0, Math.min(1, (net.cells[c].V + 60)/40));
+    stx.fillStyle = act > 0.5 ? G_ : G_FAINT;
+    stx.beginPath(); stx.arc(cellsXY[c][0], cellsXY[c][1], (2.2+2.2*act)*d, 0, Math.PI*2); stx.fill();
+  }
+  // nerves to the muscles: PD to the dilators on the roof, LP and PY to the constrictors below
+  const dil = [X(0.79), Y(0.50-gap)-4*d], con = [X(0.79), Y(0.50+gap)+4*d];
+  const nerve = (from, to, on) => { stx.strokeStyle = on ? G_ : G_FAINT; stx.lineWidth = (on?1.5:1)*d;
+    stx.beginPath(); stx.moveTo(from[0], from[1]); stx.bezierCurveTo(from[0]+0.12*W, from[1], to[0], to[1]-0.10*H, to[0], to[1]); stx.stroke(); };
+  nerve(cellsXY[0], dil, pull[0] > 0.25);
+  nerve(cellsXY[1], con, pull[1] > 0.25);
+  nerve(cellsXY[2], con, pull[2] > 0.25);
+  // muscle marks
+  const mark = (p, k, on) => { stx.fillStyle = on ? G_ : G_DIM;
+    for (let j=-1;j<=1;j++){ stx.fillRect(p[0]+j*7*d-1*d, p[1]-k*3*d, 2*d, 6*d); } };
+  mark(dil, 1, pull[0] > 0.25); mark(con, -1, (pull[1]+pull[2]) > 0.25);
+  // labels; a phone's canvas has no room for the long ones
+  const small = W/d < 640;
+  stx.fillStyle = G_DIM; stx.font = `${(small?8:9)*d}px "IBM Plex Mono", monospace`; stx.textAlign = 'center';
+  stx.fillText('CARDIAC SAC', X(0.36), Y(0.48));
+  stx.fillText(small ? 'GASTRIC MILL' : 'GASTRIC MILL · 3 TEETH · NOT DRIVEN', X(0.54), Y(0.84));
+  stx.fillText(small ? 'PYLORUS' : 'PYLORUS · DRIVEN', X(0.79), Y(0.72));
+  stx.fillText('MIDGUT', X(0.94), Y(0.62));
+  stx.textAlign = 'left';
+  stx.fillText('OESOPHAGUS', X(0.29), Y(0.92));
+  stx.fillText(small ? 'STG · ≈30 CELLS' : 'STG · ≈30 CELLS · IN THE OPHTHALMIC ARTERY', gx + 0.085*W, gy + 16*d);
+  stx.fillStyle = G_FAINT;
+  stx.fillText(small ? 'PD' : 'PD → DILATORS', X(0.70), Y(0.50-gap) - 12*d);
+  stx.fillText(small ? 'LP, PY' : 'LP, PY → CONSTRICTORS', X(0.70), Y(0.50+gap) + 20*d);
+  stx.textAlign = 'right';
+  stx.fillText('valve gap ' + gap.toFixed(3), X(0.97), Y(0.12));
+}
+
+/* The circuit, drawn once: three cells, seven inhibitory synapses. Filled
+   circles are the field's mark for an inhibitory chemical synapse. */
+const cic = $('circuit'), cix = cic.getContext('2d');
+function drawCircuit(){
+  const d = sizeCanvas(cic), W = cic.width, H = cic.height;
+  cix.fillStyle = '#000'; cix.fillRect(0,0,W,H);
+  const P = {PD:[W*0.24, H*0.50], LP:[W*0.72, H*0.26], PY:[W*0.72, H*0.76]};
+  const R = {PD: 0.11*W, LP: 0.075*W, PY: 0.075*W};
+  cix.font = `${9.5*d}px "IBM Plex Mono", monospace`; cix.textAlign = 'center';
+  // a synapse from a to b, `off` px beside the centre line, its label `pos`
+  // of the way along and `side` px further out so neighbours do not collide
+  const edge = (a, b, g, label, off, pos, side) => {
+    const [ax, ay] = P[a], [bx, by] = P[b];
+    const dx = bx-ax, dy = by-ay, L = Math.hypot(dx,dy), ux = dx/L, uy = dy/L;
+    const nx = -uy*off*d, ny = ux*off*d;
+    const x0 = ax + ux*R[a] + nx, y0 = ay + uy*R[a] + ny;
+    const x1 = bx - ux*(R[b]+5*d) + nx, y1 = by - uy*(R[b]+5*d) + ny;
+    cix.strokeStyle = G_DIM; cix.lineWidth = Math.max(1, Math.log10(g+1)*1.2)*d;
+    cix.beginPath(); cix.moveTo(x0,y0); cix.lineTo(x1,y1); cix.stroke();
+    cix.fillStyle = G_; cix.beginPath(); cix.arc(x1, y1, 3.2*d, 0, Math.PI*2); cix.fill();
+    cix.fillStyle = G_FAINT;
+    const lx = x0 + (x1-x0)*pos - uy*side*d, ly = y0 + (y1-y0)*pos + ux*side*d + 3*d;
+    cix.fillText(label, lx, ly);
+  };
+  edge('PD','LP',10,'AB → LP glut 10 nS', -9, 0.30, -14); edge('PD','LP',3,'PD → LP ACh 3 nS', 9, 0.62, 14);
+  edge('PD','PY',30,'AB → PY glut 30 nS', 9, 0.30, 14);   edge('PD','PY',10,'PD → PY ACh 10 nS', -9, 0.62, -14);
+  edge('LP','PD',30,'LP → PD glut 30 nS', -30, 0.45, -14);
+  edge('LP','PY',3,'LP → PY 3 nS', -9, 0.35, -62);       edge('PY','LP',10,'PY → LP 10 nS', -9, 0.35, -62);
+  for (const k of ['PD','LP','PY']){
+    cix.fillStyle = '#000'; cix.strokeStyle = G_; cix.lineWidth = 1.4*d;
+    cix.beginPath(); cix.arc(P[k][0], P[k][1], R[k], 0, Math.PI*2); cix.fill(); cix.stroke();
+    cix.fillStyle = G_; cix.font = `${(k==='PD'?12:11)*d}px "IBM Plex Mono", monospace`;
+    cix.fillText(k === 'PD' ? 'AB/PD' : k, P[k][0], P[k][1] + 4*d);
+    cix.fillStyle = G_FAINT; cix.font = `${8.5*d}px "IBM Plex Mono", monospace`;
+    cix.fillText(k === 'PD' ? 'pacemaker' : (k === 'LP' ? 'lateral pyloric' : 'pyloric'), P[k][0], P[k][1] + R[k] + 12*d);
+  }
+  cix.fillStyle = G_FAINT; cix.textAlign = 'left'; cix.font = `${8.5*d}px "IBM Plex Mono", monospace`;
+  cix.fillText('ALL SYNAPSES INHIBITORY · GRADED · ● = INHIBITION', 10*d, H - 10*d);
+}
+
+/* The phases, live: the model's last cycle against the animal's ranges. */
+const phc = $('phases'), phx = phc.getContext('2d');
+const ANIMAL = {PD:[0, 0.30], LP:[0.35, 0.60], PY:[0.55, 0.95]};
+function drawPhases(v){
+  const d = sizeCanvas(phc), W = phc.width, H = phc.height;
+  phx.fillStyle = '#000'; phx.fillRect(0,0,W,H);
+  const x0 = 46*d, x1 = W - 14*d, rowH = (H - 40*d) / 3, top = 16*d;
+  phx.font = `${9*d}px "IBM Plex Mono", monospace`;
+  for (let k=0;k<=4;k++){ const x = x0 + (x1-x0)*k/4;
+    phx.strokeStyle = G_FAINT; phx.setLineDash([2*d,3*d]); phx.beginPath(); phx.moveTo(x, top); phx.lineTo(x, H - 20*d); phx.stroke(); phx.setLineDash([]);
+    phx.fillStyle = G_FAINT; phx.textAlign = 'center'; phx.fillText((k/4).toFixed(2), x, H - 8*d); }
+  const last = v && v.ready ? v.last : null;
+  const rows = [['PD', last ? [0, last.pdOff] : null], ['LP', last && last.lpN ? [last.lpOn, last.lpOff] : null], ['PY', last && last.pyN ? [last.pyOn, last.pyOff] : null]];
+  rows.forEach(([name, m], i) => {
+    const y = top + i*rowH + rowH*0.18, h = rowH*0.26;
+    phx.fillStyle = G_DIM; phx.textAlign = 'left'; phx.fillText(name, 10*d, y + h*0.9);
+    const a = ANIMAL[name];
+    phx.strokeStyle = G_DIM; phx.lineWidth = 1*d;
+    phx.strokeRect(x0 + (x1-x0)*a[0], y + h + 4*d, (x1-x0)*(a[1]-a[0]), h);
+    if (m){ phx.fillStyle = i===0 ? G_ : (i===1 ? AMBER : '#bfffd6');
+      phx.fillRect(x0 + (x1-x0)*Math.max(0,m[0]), y, (x1-x0)*Math.max(0.005, Math.min(1,m[1])-Math.max(0,m[0])), h); }
+  });
+  phx.fillStyle = G_FAINT; phx.textAlign = 'left';
+  phx.fillText('FILLED · MODEL, LAST CYCLE     OUTLINE · ANIMAL, ≈ BUCHER 2005', 10*d, 10*d);
+}
+
+function renderVerdicts(){
+  const v = STG.verdict(net);
+  const nCyc = Math.max(0, net.bursts[0].length - 1);
+  $('ncyc').textContent = nCyc;
+  $('mt').textContent = (net.t/1000).toFixed(0) + ' s';
+  $('tstat').textContent = 'model time ' + (net.t/1000).toFixed(1) + ' s · ' + net.mode + ' · spikes ' + net.nSpikes.join(' / ');
+  if (!v.ready){
+    const silenced = net.mode === 'silenced';
+    $('period').textContent = '—';
+    $('periodsub').textContent = silenced ? 'NO CYCLES · PD HELD AT −60 MV' : 'WAITING FOR THE FIRST CYCLES';
+    for (const id of ['m1','m2','m3','c-pd','c-lp','c-py','c-rate']) $(id).textContent = silenced ? 'no cycle' : '—';
+    $('pass').textContent = '● PASS = ' + (silenced ? 'FALSE' : '—'); $('pass').classList.remove('on');
+    $('s1tag').textContent = 'live · ' + (silenced ? 'silenced' : 'waiting');
+    $('st-pd').textContent = $('st-c').textContent = $('st-open').textContent = silenced ? 'no cycle' : '—';
+    drawPhases(v); return v;
+  }
+  const P = v.P/1000;
+  $('period').textContent = P.toFixed(2) + ' s';
+  $('periodsub').textContent = (1/P).toFixed(2) + ' HZ · LAST ' + v.cyc.length + ' CYCLES · CV ' + v.cv.toFixed(2);
+  const ok = (b, txt) => `${txt} <span class="${b ? 'tdim' : 'bad'}">${b ? 'OK' : 'FAIL'}</span>`;
+  $('m1').innerHTML = ok(v.m1, P.toFixed(2) + ' s');
+  const L = v.last;
+  $('m2').innerHTML = ok(v.m2, `1 / ${L.lpN} / ${L.pyN}`);
+  $('m3').innerHTML = ok(v.m3, `${fmt(0)} → ${fmt(L.lpOn)} → ${fmt(L.pyOn)}`);
+  $('c-pd').textContent = `0.00–${fmt(L.pdOff)} · ${L.pdN} spikes`;
+  $('c-lp').textContent = L.lpN ? `${fmt(L.lpOn)}–${fmt(L.lpOff)} · ${L.lpSp} spikes` : 'silent';
+  $('c-py').textContent = L.pyN ? `${fmt(L.pyOn)}–${fmt(L.pyOff)} · ${L.pySp} spikes` : 'silent';
+  $('c-rate').textContent = ((L.pdN + L.lpSp + L.pySp) / (L.T/1000)).toFixed(0) + ' Hz';
+  const pass = v.m1 && v.m2 && v.m3 && m4 === true;
+  $('pass').textContent = '● PASS = ' + (m4 === null ? '—' : (pass ? 'TRUE' : 'FALSE'));
+  $('pass').classList.toggle('on', pass);
+  const tag = $('s1tag'), step = $('s1step');
+  tag.textContent = net.mode === 'coupled' ? ('live · ' + (m4 === null ? 'waiting' : pass ? 'pass' : 'fail')) : ('live · ' + net.mode);
+  step.classList.toggle('done', pass); step.classList.toggle('fail', !pass && m4 !== null);
+  // the stomach's numbers for the last cycle: fraction of the cycle each pull was up
+  $('st-pd').textContent = fmt(L.pdOff) + ' of the cycle';
+  $('st-c').textContent = (L.lpN && L.pyN) ? fmt(Math.min(1, L.pyOff) - L.lpOn) + ' of the cycle' : '—';
+  $('st-open').textContent = Number.isFinite(gapPeakLast) ? gapPeakLast.toFixed(3) + ' of the drawing, gap 0.012–0.13' : '—';
+  drawPhases(v);
+  return v;
+}
+
+/* M4, once: the same cells with every synapse at zero, 8 s, first 3 s skipped. */
+function computeM4(){
+  // 3 s of transient thrown away, then 5 s scored
+  const off = STG.runOffline('cut', 3000);
+  const seen = off.nSpikes.slice();
+  STG.runOffline('cut', 5000, off);
+  for (let c=0;c<3;c++) off.bursts[c] = off.bursts[c].filter(b => b.start >= 3000);
+  const v = STG.verdict(off);
+  const orderHeld = v.ready && v.m2 && v.m3;
+  m4 = !orderHeld;
+  const lpHz = ((off.nSpikes[1]-seen[1])/5).toFixed(0);
+  const pyHz = ((off.nSpikes[2]-seen[2])/5).toFixed(0);
+  const pdB = off.bursts[0].length;
+  $('m4').innerHTML = `${m4 ? 'lost' : 'held'} <span class="${m4 ? 'tdim' : 'bad'}">${m4 ? 'OK' : 'FAIL'}</span>`;
+  $('verdictnote').textContent = `Phases are fractions of the PD-to-PD cycle. M4 was computed once at load from 8 s of the same three cells with every synapse at zero: PD burst ${pdB} times in the last 5 s, LP fired at ${lpHz} Hz and PY at ${pyHz} Hz with no order between them.`;
+}
+
+// the pills switch the live net's condition; the burst records restart so the
+// verdicts describe the new condition and not a mixture
+for (const b of document.querySelectorAll('#board1 button.pip2')){
+  b.addEventListener('click', () => {
+    net.mode = b.dataset.mode;
+    net.bursts = [[],[],[]]; net.nSpikes = [0,0,0];
+    for (const o of document.querySelectorAll('#board1 button.pip2')) o.classList.toggle('on', o === b);
+  });
+}
+
+let lastFrame = performance.now(), frames = 0, fpsAt = lastFrame;
+function loop(now){
+  const dtReal = Math.min(50, now - lastFrame); lastFrame = now;
+  advance(dtReal);
+  drawTraces();
+  drawStomach();
+  if ((frames++ & 3) === 0) renderVerdicts();
+  if (now - fpsAt > 1000){ $('tfps').textContent = frames + ' fps · 1.00× real time'; frames = 0; fpsAt = now; }
+  requestAnimationFrame(loop);
+}
+drawCircuit();
+addEventListener('resize', drawCircuit);
+// warm the net past its transient so the first cycles on screen are settled
+advance(2500);
+requestAnimationFrame(loop);
+setTimeout(computeM4, 400);
+
+/* ---------------------------------------------------------------------------
+   Live state, read in your browser.
+
+   If CONFIG.chain.rpc is set, the page asks the chain's public node directly
+   for the block number and, once a token exists, its symbol and supply. There
+   is no server of ours between you and the data; open devtools and watch the
+   eth_call go out. With no rpc, the static facts in CONFIG are shown.
+--------------------------------------------------------------------------- */
+const nf = (v, d=0) => v==null ? '—' : Number(v).toLocaleString(undefined,
+  {minimumFractionDigits:d, maximumFractionDigits:d});
+let rpcId = 0;
+async function rpc(method, params){
+  const r = await fetch(CONFIG.chain.rpc, {method:'POST', headers:{'content-type':'application/json'},
+    body: JSON.stringify({jsonrpc:'2.0', id:++rpcId, method, params})});
+  const j = await r.json();
+  if (j.error) throw new Error(j.error.message || 'rpc error');
+  return j.result;
+}
+const hexInt = h => h ? parseInt(h, 16) : 0;
+function abiString(x){
+  if (!x || x.length < 130) return '';
+  const n = parseInt(x.slice(66,130), 16);
+  let out = '';
+  for (let i=0;i<n;i++) out += String.fromCharCode(parseInt(x.substr(130+i*2,2),16));
+  return out;
+}
+
+function renderStatic(){
+  const c = CONFIG, has = !!c.token;
+  $('chain-name').textContent = c.chain.name || 'chain';
+  $('ca-ticker').textContent = '$' + c.ticker;
+  $('oc-ticker').textContent = '$' + c.ticker;
+  $('oc-chain').textContent = c.chain.name || 'the chain';
+  if (!has) $('oc-lede').innerHTML = 'Not launched yet. When it is, the receipt will be read from ' + (c.chain.name || 'the chain') + ' and shown here, rather than taken on this page\'s word.';
+  $('t-chain').textContent = c.chain.name + (c.chain.id ? ' · id ' + c.chain.id : '');
+  $('t-pair').textContent = c.pair; $('t-tax').textContent = c.creatorTax;
+  $('t-sup').textContent = c.supply === '—' ? '—' : c.supply + ' ' + c.ticker;
+  $('t-ca').textContent = has ? c.token : 'not launched yet';
+  $('ca-text').textContent = has ? c.token : 'not launched yet — the address will appear here';
+  $('ca-text').classList.toggle('soon', !has);
+  $('ca-copy').disabled = !has;
+  const link = $('t-link');
+  if (c.launchpad) link.href = c.launchpad; else { link.removeAttribute('href'); link.textContent = 'launchpad link to follow'; }
+  const show = (id, href, text) => { const a = $(id); if (href){ a.href = href; if (text) a.textContent = text; a.hidden = false; } };
+  show('f-x', c.x, c.x ? '@' + c.x.replace(/.*\//,'') : null);
+  show('f-src', c.source, 'source');
+  if (c.source){ $('src-cell').innerHTML = `<a href="${c.source}">${c.source.replace(/^https?:\/\/(www\.)?/,'')}</a>`; }
+  if (has && c.chain.explorer) show('f-scan', c.chain.explorer + c.token, 'explorer');
+  if (!c.chain.rpc){
+    $('blk').textContent = has ? 'launched' : 'not launched';
+    $('livelabel').textContent = has ? 'static' : 'not launched';
+    $('livedot').classList.add('stale'); $('pip').classList.add('stale');
+    $('pip-t').textContent = has ? 'facts typed in, not read' : 'not launched';
+    $('upd').textContent = '—';
+  }
+}
+
+async function readChain(){
+  const c = CONFIG;
+  const blk = await rpc('eth_blockNumber', []);
+  $('blk').textContent = 'block ' + nf(hexInt(blk));
+  if (c.token){
+    const [sup, sym] = await Promise.all([
+      rpc('eth_call', [{to:c.token, data:'0x18160ddd'}, 'latest']),
+      rpc('eth_call', [{to:c.token, data:'0x95d89b41'}, 'latest']),
+    ]);
+    const symbol = abiString(sym) || c.ticker;
+    $('t-sup').textContent = nf(Number(BigInt(sup))/1e18) + ' ' + symbol;
+  }
+  $('upd').textContent = new Date().toISOString().slice(11,19) + ' UTC';
+  $('livedot').classList.remove('stale'); $('pip').classList.remove('stale');
+  $('livelabel').textContent = 'chain read';
+  $('pip-t').textContent = 'read from ' + c.chain.name;
+}
+async function tick(){
+  if (!CONFIG.chain.rpc) return;
+  try { await readChain(); }
+  catch (e) {
+    $('livedot').classList.add('stale'); $('pip').classList.add('stale');
+    $('pip-t').textContent = 'chain unreachable';
+    $('upd').textContent = 'offline';
+  }
+}
+
+/* Copy. navigator.clipboard needs a secure context, so there is a textarea
+   fallback for anything served over plain http. The label reports the result
+   rather than flashing a toast somewhere else on the page. */
+(function(){
+  const btn = $('ca-copy'), lab = $('ca-copy-t'), live = $('ca-live');
+  let timer = null;
+  btn.addEventListener('click', async () => {
+    if (!CONFIG.token) return;
+    let ok = true;
+    try { await navigator.clipboard.writeText(CONFIG.token); }
+    catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = CONFIG.token; ta.setAttribute('readonly','');
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { ok = document.execCommand('copy'); } catch (_) { ok = false; }
+      ta.remove();
+    }
+    lab.textContent = ok ? 'Copied' : 'Press Ctrl+C';
+    live.textContent = ok ? 'Contract address copied' : 'Copy failed, select it manually';
+    btn.classList.toggle('done', ok);
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      lab.textContent = 'Copy'; live.textContent = '';
+      btn.classList.remove('done');
+    }, 1800);
+  });
+})();
+
+renderStatic();
+tick();
+setInterval(tick, 15000);
+</script>
+</body>
+</html>
